@@ -1,4 +1,4 @@
-module github.com/alrobwilloliver/simplebank
+module github.com/alrobwilloliver/bank
 
 go 1.19
 
