@@ -9,6 +9,11 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+// create a random integer between min and max
+func RandomInt(min, max int) int {
+	return min + rand.Intn(max-min)
+}
+
 func RandomString(n int) string {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	b := make([]byte, n)
