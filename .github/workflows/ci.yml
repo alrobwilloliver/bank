@@ -41,9 +41,7 @@ jobs:
         which migrate
 
     - name: run down migrations
-      run: |
-        make migratedown
-        y
+      run: make migratedown
 
     - name: run migrations
       run: make migrateup
