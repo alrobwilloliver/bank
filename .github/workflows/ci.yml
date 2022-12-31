@@ -41,10 +41,7 @@ jobs:
         which migrate
 
     - name: drop table data
-      run: make dropdb
-
-    - name: create db
-      run: make createdb
+      run: PGPASSWORD=secret psql -h localhost -U root -d bank -c "TRUNCATE TABLE entries, transfers, accounts RESTART IDENTITY CASCADE;"
 
     - name: run migrations
       run: make migrateup
