@@ -40,8 +40,11 @@ jobs:
         sudo mv migrate /usr/bin/
         which migrate
 
-    - name: run down 1 migration
-      run: make migratedown1
+    - name: drop table data
+      run: make dropdb
+
+    - name: create db
+      run: make createdb
 
     - name: run migrations
       run: make migrateup
