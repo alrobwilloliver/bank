@@ -40,8 +40,8 @@ jobs:
         sudo mv migrate /usr/bin/
         which migrate
 
-    - name: run down migrations
-      run: make migratedown
+    - name: run down 1 migration
+      run: make migratedown1
 
     - name: run migrations
       run: make migrateup
