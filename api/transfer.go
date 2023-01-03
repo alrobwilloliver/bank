@@ -2,10 +2,12 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 
 	db "github.com/alrobwilloliver/bank/db/sqlc"
+	"github.com/alrobwilloliver/bank/token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,11 +26,19 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 		return
 	}
 
-	if !server.validAccount(ctx, req.FromAccountID, req.Currency) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	fromAccount, valid := server.validAccount(ctx, req.FromAccountID, req.Currency)
+	if !valid {
 		return
 	}
 
-	if !server.validAccount(ctx, req.ToAccountID, req.Currency) {
+	if fromAccount.Owner != authPayload.Username {
+		ctx.JSON(http.StatusForbidden, errors.New("account does not belong to the authenticated user"))
+		return
+	}
+
+	_, valid = server.validAccount(ctx, req.ToAccountID, req.Currency)
+	if !valid {
 		return
 	}
 
@@ -47,23 +57,23 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
-func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) bool {
+func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) (db.Account, bool) {
 	// get account
 	account, err := server.store.GetAccount(ctx, accountID)
 	// check if account exists
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return false
+			return account, false
 		}
 
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return false
+		return account, false
 	}
 	// check if the currency matches
 	if account.Currency != currency {
 		ctx.JSON(http.StatusBadRequest, fmt.Sprintf("account [%d] currency [%s] does not match transfer currency %s", accountID, account.Currency, currency))
-		return false
+		return account, false
 	}
-	return true
+	return account, true
 }
