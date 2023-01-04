@@ -29,3 +29,17 @@ docker network connect bank-network postgres12
 ```
 docker run --name bank --network bank-network -p 8080:8080 -e GIN_MODE=release -e DB_SOURCE="postgresql://root:secret@postgres12:5432/bank?sslmode=disable" bank
 ```
+
+### once deployed you can pull the image from aws ecr
+## login to aws ecr
+```
+aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin $LINK_OF_DEPLOYED_IMAGE
+```
+## pull image from aws ecr
+```
+docker pull $LINK_OF_DEPLOYED_IMAGE
+```
+## run image from aws ecr
+```
+docker run --name bank --network bank-network -p 8080:8080 -e GIN_MODE=release $LINK_OF_DEPLOYED_IMAGE
+```
