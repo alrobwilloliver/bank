@@ -6,7 +6,8 @@ on:
 
 jobs:
 
-  build:
+  deploy:
+
     name: Build image
     runs-on: ubuntu-latest
 
@@ -25,6 +26,13 @@ jobs:
       - name: checkout to application directory
         uses: actions/checkout@v3
 
+      - name: install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.26.0'
+        id: install
+
+
       - name: load secrets and save to app.env
         run: aws secretsmanager get-secret-value --secret-id bank --query SecretString --output text | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > app.env
 
@@ -34,7 +42,14 @@ jobs:
           REPOSITORY: bank
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t latest .
+          docker push -a $REGISTRY/$REPOSITORY
+
+      - name: Deploy to AWS EKS
+        run: |
+          kubectl apply -f eks/aws-auth.yaml
+          kubectl apply -f eks/deployment.yaml
+          kubectl apply -f eks/service.yaml
+
 
 
