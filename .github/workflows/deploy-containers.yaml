@@ -49,6 +49,9 @@ jobs:
         run: |
           kubectl cluster-info
           cat ~/.kube/config
+          cat ~/.aws/credentials
+          echo $secrets.AWS_SECRET_ACCESS_KEY
+          echo $secrets.AWS_ACCESS_KEY_ID
           kubectl apply -f eks/aws-auth.yaml
           kubectl apply -f eks/deployment.yaml
           kubectl apply -f eks/service.yaml
