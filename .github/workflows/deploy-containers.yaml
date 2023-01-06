@@ -48,6 +48,7 @@ jobs:
       - name: Deploy to AWS EKS
         run: |
           kubectl cluster-info
+          cat ~/.kube/config
           kubectl apply -f eks/aws-auth.yaml
           kubectl apply -f eks/deployment.yaml
           kubectl apply -f eks/service.yaml
